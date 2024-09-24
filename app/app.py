@@ -7,7 +7,7 @@ app = Flask(__name__)
 def index():
     return "Index!"
 
-@app.route('/getcode', methods=['GET'])
+@app.route('/getcode', methods=['GET']) #แก้ API ตรงนี้
 def getcode():
     return "Hello, This is my code 5555"
 

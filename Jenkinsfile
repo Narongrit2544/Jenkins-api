@@ -1,11 +1,11 @@
 pipeline {
     triggers {
-        pollSCM('H/5 * * * *') // Check every 5 minutes
+        pollSCM('5 * * * *') // Check every 5 minutes
     }
     agent {label 'connect-vmtest'}
     environment {
         GITLAB_IMAGE_NAME = "registry.gitlab.com/watthachai/simple-api-docker-registry"
-        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/***********"
+        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/Jenkins-aun-job@2"
     }
     stages {
         stage('Deploy Docker Compose') {
@@ -22,12 +22,12 @@ pipeline {
                 
                 # Check if the directory already exists
                 if [ ! -d "simple-api-robot" ]; then
-                    git clone https://github.com/CE-SDPX/simple-api-robot.git
+                    git clone https://github.com/SDPxMTNRWTPKKS/robot-aun.git
                 fi
                 
                 # Install dependencies before running tests
                 pip install -r requirements.txt 
-                cd simple-api-robot
+                cd robo-aun
                 robot test-calculate.robot
                 
                 cd ${VMTEST_MAIN_WORKSPACE}
@@ -45,10 +45,11 @@ pipeline {
                         credentialsId: 'gitlab-registry',
                         passwordVariable: 'gitlabPassword',
                         usernameVariable: 'gitlabUser'
+
                     )]
                 ){
                     sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
-                    sh "docker tag ${GITLAB_IMAGE_NAME} ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "docker tag ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                     sh "docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                     sh "docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                 }
