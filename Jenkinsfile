@@ -50,7 +50,7 @@ pipeline {
                     )]
                 ){
                     sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
-                    sh "docker tag ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "docker tag ${GITLAB_IMAGE_NAME} ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                     sh "docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                     sh "docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                 }
