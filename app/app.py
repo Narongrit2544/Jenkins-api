@@ -23,10 +23,7 @@ def calculate(num1, num2):
         num2 = int(num2)
 
         results = {
-                'plus' : num1 + num2,
-                'minus' : num1 - num2,
-                'multiply': num1 * num2,
-                'divide' : num1/num2
+                'plus' : num1 + num2
             }
     except:
         results = { 'error_msg' : 'inputs must be numbers' }
