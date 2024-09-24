@@ -21,7 +21,8 @@ pipeline {
                 . /home/vmtest/env/bin/activate
                 
                 # Check if the directory already exists
-                if [ ! -d "simple-api-robot" ]; then
+                rm -rf robot-aun
+                if [ ! -d "robot-aun" ]; then
                     git clone https://github.com/SDPxMTNRWTPKKS/robot-aun.git
                 fi
                 
