@@ -11,6 +11,7 @@ def index():
 def getcode():
     return "Hello, Boat! Boom Fluke Aun Dream"
 
+
 @app.route('/hello/<name>', methods=['GET'])
 def hello(name):
     return "Hello, " + str(name)
