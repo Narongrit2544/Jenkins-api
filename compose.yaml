@@ -1,0 +1,7 @@
+services:
+  web:
+    build:
+      context: app
+    ports:
+      - "5000:5000"
+    image: registry.gitlab.com/watthachai/simple-api-docker-registry:latest
