@@ -38,7 +38,7 @@ pipeline {
                 '''
             }
         }
-        stage("Delivery to Gitlab Registry") {
+        stage("Delivery to GitLab Registry") {
             agent {label 'connect-vmtest'}
             steps {
                 withCredentials(
@@ -46,7 +46,6 @@ pipeline {
                         credentialsId: 'gitlab-registry',
                         passwordVariable: 'gitlabPassword',
                         usernameVariable: 'gitlabUser'
-
                     )]
                 ){
                     sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
@@ -56,7 +55,7 @@ pipeline {
                 }
             }
         }
-        stage("Pull from Gitlab Registry") {
+        stage("Pull from GitLab Registry") {
             agent {label 'connect-vmpreprod'}
             steps {
                 withCredentials(
@@ -65,18 +64,19 @@ pipeline {
                         passwordVariable: 'gitlabPassword',
                         usernameVariable: 'gitlabUser'
                     )]
-                )
-                script {
-                    def containers = sh(script: "docker ps -q", returnStdout: true).trim()
-                    if (containers) {
-                        sh "docker stop ${containers}"
-                    } else {
-                        echo "No running containers to stop."
+                ) {
+                    script {
+                        def containers = sh(script: "docker ps -q", returnStdout: true).trim()
+                        if (containers) {
+                            sh "docker stop ${containers}"
+                        } else {
+                            echo "No running containers to stop."
+                        }
                     }
-                sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
-                sh "docker pull ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                sh "docker run -p 5000:5000 -d ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-            }
+                    sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
+                    sh "docker pull ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "docker run -p 5000:5000 -d ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                }
             }
         }
     }
