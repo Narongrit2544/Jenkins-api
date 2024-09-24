@@ -73,12 +73,10 @@ pipeline {
                     } else {
                         echo "No running containers to stop."
                     }
-                }
-                {
-                    sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
-                    sh "docker pull ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    sh "docker run -p 5000:5000 -d ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                }
+                sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
+                sh "docker pull ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                sh "docker run -p 5000:5000 -d ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+            }
             }
         }
     }
