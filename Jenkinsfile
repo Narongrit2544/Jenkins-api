@@ -28,7 +28,7 @@ pipeline {
                 
                 # Install dependencies before running tests
                 pip install -r requirements.txt 
-                cd robo-aun
+                cd robot-aun
                 robot test-calculate.robot
                 
                 cd ${VMTEST_MAIN_WORKSPACE}
