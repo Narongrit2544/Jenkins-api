@@ -1,6 +1,6 @@
 pipeline {
     triggers {
-        pollSCM('5 * * * *') // Check every 5 minutes
+        pollSCM('1 * * * *') // Check every 5 minutes
     }
     agent {label 'connect-vmtest'}
     environment {
