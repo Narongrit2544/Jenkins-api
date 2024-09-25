@@ -4,4 +4,4 @@ services:
       context: app
     ports:
       - "5000:5000"
-    image: registry.gitlab.com/watthachai/simple-api-docker-registry:latest
+    image: registry.gitlab.com/threeman/boomtestjenkins:latest

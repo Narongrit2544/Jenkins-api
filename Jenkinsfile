@@ -2,20 +2,20 @@ pipeline {
     triggers {
         pollSCM('1 * * * *') // Check every 5 minutes
     }
-    agent {label 'connect-vmtest'}
+    agent {label 'vmtest'}
     environment {
-        GITLAB_IMAGE_NAME = "registry.gitlab.com/watthachai/simple-api-docker-registry"
-        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/Jenkins-aun-job@2/"
+        GITLAB_IMAGE_NAME = "registry.gitlab.com/threeman/boomtestjenkins"
+        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/********"
     }
     stages {
         stage('Deploy Docker Compose') {
-            agent {label 'connect-vmtest'}
+            agent {label 'vmtest'}
             steps {
                 sh "docker compose up -d --build"
             }
         }
         stage("Run Tests") {
-            agent {label 'connect-vmtest'}
+            agent {label 'vmtest'}
             steps {
                 sh '''
                 . /home/vmtest/env/bin/activate
@@ -39,11 +39,11 @@ pipeline {
             }
         }
         stage("Delivery to GitLab Registry") {
-            agent {label 'connect-vmtest'}
+            agent {label 'vmtest'}
             steps {
                 withCredentials(
                     [usernamePassword(
-                        credentialsId: 'gitlab-registry',
+                        credentialsId: 'gitlab-admin',
                         passwordVariable: 'gitlabPassword',
                         usernameVariable: 'gitlabUser'
                     )]
@@ -56,11 +56,11 @@ pipeline {
             }
         }
         stage("Pull from GitLab Registry") {
-            agent {label 'connect-vmpreprod'}
+            agent {label 'vmpreprod'}
             steps {
                 withCredentials(
                     [usernamePassword(
-                        credentialsId: 'gitlab-registry',
+                        credentialsId: 'gitlab-admin',
                         passwordVariable: 'gitlabPassword',
                         usernameVariable: 'gitlabUser'
                     )]
