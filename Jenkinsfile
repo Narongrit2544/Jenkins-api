@@ -9,13 +9,13 @@ pipeline {
     }
     stages {
         stage('Deploy Docker Compose') {
-            agent {label 'vmtest'}
+            agent {label 'vmtest-test'}
             steps {
                 sh "docker compose up -d --build"
             }
         }
         stage("Run Tests") {
-            agent {label 'vmtest'}
+            agent {label 'vmtest-test'}
             steps {
                 sh '''
                 . /home/vmtest/env/bin/activate
@@ -39,7 +39,7 @@ pipeline {
             }
         }
         stage("Delivery to GitLab Registry") {
-            agent {label 'vmtest'}
+            agent {label 'vmtest-test'}
             steps {
                 withCredentials(
                     [usernamePassword(
