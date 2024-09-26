@@ -11,6 +11,19 @@ pipeline {
         stage('Deploy Docker Compose') {
             agent { label 'vmtest-test' }
             steps {
+                // Check and remove any existing containers before starting new deployment
+                script {
+                    def containers = sh(script: "docker ps -a -q --filter 'name=jenkinstestjob-web-1'", returnStdout: true).trim()
+                    if (containers) {
+                        // Stop and remove the existing container
+                        sh "docker stop ${containers} || true"
+                        sh "docker rm ${containers} || true"
+                        echo "Existing container removed."
+                    } else {
+                        echo "No existing containers to remove."
+                    }
+                }
+                // Deploy using docker-compose
                 sh "docker compose up -d --build"
             }
         }
@@ -66,12 +79,13 @@ pipeline {
                     script {
                         def containers = sh(script: "sudo docker ps -q", returnStdout: true).trim()
                         if (containers) {
-                            // Use try-catch to handle permission denied errors gracefully
+                            // Stop and remove the running containers
                             try {
                                 sh "docker stop ${containers}"
-                                echo "Containers stopped successfully."
+                                sh "docker rm ${containers}"
+                                echo "Containers stopped and removed successfully."
                             } catch (Exception e) {
-                                echo "Failed to stop containers, but continuing: ${e.getMessage()}"
+                                echo "Failed to stop/remove containers, but continuing: ${e.getMessage()}"
                             }
                         } else {
                             echo "No running containers to stop."
