@@ -11,20 +11,19 @@ pipeline {
         stage('Deploy Docker Compose') {
             agent { label 'vmtest-test' }
             steps {
-                // Check and remove any existing containers before starting new deployment
                 script {
-                    def containers = sh(script: "docker ps -a -q --filter 'name=jenkinstestjob-web-1'", returnStdout: true).trim()
+                    def containers = sh(script: "sudo docker ps -a -q --filter 'name=jenkinstestjob-web-1'", returnStdout: true).trim()
                     if (containers) {
-                        // Stop and remove the existing container
-                        sh "docker stop ${containers} || true"
-                        sh "docker rm ${containers} || true"
+                        // Stop and remove the existing container using sudo
+                        sh "sudo docker stop ${containers} || true"
+                        sh "sudo docker rm ${containers} || true"
                         echo "Existing container removed."
                     } else {
                         echo "No existing containers to remove."
                     }
                 }
                 // Deploy using docker-compose
-                sh "docker compose up -d --build"
+                sh "sudo docker compose up -d --build"
             }
         }
         stage("Run Tests") {
@@ -59,10 +58,10 @@ pipeline {
                         usernameVariable: 'gitlabUser'
                     )]
                 ) {
-                    sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
-                    sh "docker tag ${GITLAB_IMAGE_NAME} ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    sh "docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    sh "docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "sudo docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
+                    sh "sudo docker tag ${GITLAB_IMAGE_NAME} ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "sudo docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "sudo docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                 }
             }
         }
@@ -79,10 +78,10 @@ pipeline {
                     script {
                         def containers = sh(script: "sudo docker ps -q", returnStdout: true).trim()
                         if (containers) {
-                            // Stop and remove the running containers
+                            // Stop and remove the running containers using sudo
                             try {
-                                sh "docker stop ${containers}"
-                                sh "docker rm ${containers}"
+                                sh "sudo docker stop ${containers}"
+                                sh "sudo docker rm ${containers}"
                                 echo "Containers stopped and removed successfully."
                             } catch (Exception e) {
                                 echo "Failed to stop/remove containers, but continuing: ${e.getMessage()}"
@@ -91,9 +90,9 @@ pipeline {
                             echo "No running containers to stop."
                         }
                     }
-                    sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
-                    sh "docker pull ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    sh "docker run -p 5000:5000 -d ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "sudo docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
+                    sh "sudo docker pull ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "sudo docker run -p 5000:5000 -d ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                 }
             }
         }
