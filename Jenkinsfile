@@ -11,7 +11,7 @@ pipeline {
         stage('Deploy Docker Compose') {
             agent {label 'vmtest-test'}
             steps {
-                sh "docker compose up -d --build"
+                sh "sudo docker compose up -d --build"
             }
         }
         stage("Run Tests") {
@@ -48,10 +48,10 @@ pipeline {
                         usernameVariable: 'gitlabUser'
                     )]
                 ){
-                    sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
-                    sh "docker tag ${GITLAB_IMAGE_NAME} ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    sh "docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    sh "docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "sudo docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
+                    sh "sudo docker tag ${GITLAB_IMAGE_NAME} ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "sudo docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "sudo docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                 }
             }
         }
@@ -68,14 +68,14 @@ pipeline {
                     script {
                         def containers = sh(script: "docker ps -q", returnStdout: true).trim()
                         if (containers) {
-                            sh "docker stop ${containers}"
+                            sh "sudo docker stop ${containers} || true "
                         } else {
                             echo "No running containers to stop."
                         }
                     }
-                    sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
-                    sh "docker pull ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    sh "docker run -p 5000:5000 -d ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "sudo docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
+                    sh "sudo docker pull ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "sudo docker run -p 5000:5000 -d ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                 }
             }
         }
