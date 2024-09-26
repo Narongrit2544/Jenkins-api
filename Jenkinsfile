@@ -12,11 +12,11 @@ pipeline {
             agent { label 'vmtest-test' }
             steps {
                 script {
-                    def containers = sh(script: "sudo docker ps -a -q --filter 'name=jenkinstestjob-web-1'", returnStdout: true).trim()
+                    def containers = sh(script: "docker ps -a -q --filter 'name=jenkinstestjob-web-1'", returnStdout: true).trim()
                     if (containers) {
                         // Stop and remove the existing container
-                        sh "sudo docker stop ${containers} || true"
-                        sh "sudo docker rm ${containers} || true"
+                        sh "docker stop ${containers} || true"
+                        sh "docker rm ${containers} || true"
                         echo "Existing container removed."
                     } else {
                         echo "No existing containers to remove."
@@ -75,7 +75,7 @@ pipeline {
                     )]
                 ) {
                     script {
-                        def containers = sh(script: "sudo docker ps -q", returnStdout: true).trim()
+                        def containers = sh(script: "docker ps -q", returnStdout: true).trim()
                         if (containers) {
                             // Use try-catch to handle permission denied errors gracefully
                             try {
