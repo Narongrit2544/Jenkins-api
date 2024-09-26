@@ -14,10 +14,10 @@ pipeline {
                 script {
                     def containers = sh(script: "docker ps -a -q --filter 'name=jenkinstestjob-web-1'", returnStdout: true).trim()
                     if (containers) {
-                        // Stop and remove the existing containers without sudo
+                        // บังคับหยุดและลบ container
                         containers.split().each { containerId ->
-                            sh "docker stop ${containerId} || true"
-                            sh "docker rm ${containerId} || true"
+                            sh "docker kill ${containerId} || true"
+                            sh "docker rm -f ${containerId} || true"
                         }
                         echo "Existing containers removed."
                     } else {
@@ -25,7 +25,7 @@ pipeline {
                     }
                 }
                 // Deploy using docker-compose
-                sh "docker compose up -d --build"
+                sh "docker-compose up -d --build"
             }
         }
         stage("Run Tests") {
@@ -80,11 +80,10 @@ pipeline {
                     script {
                         def containers = sh(script: "docker ps -q", returnStdout: true).trim()
                         if (containers) {
-                            // Use try-catch to handle errors gracefully
                             containers.split().each { containerId ->
                                 try {
-                                    sh "docker stop ${containerId}"
-                                    sh "docker rm ${containerId}"
+                                    sh "docker kill ${containerId}"
+                                    sh "docker rm -f ${containerId}"
                                     echo "Container ${containerId} stopped and removed successfully."
                                 } catch (Exception e) {
                                     echo "Failed to stop/remove container ${containerId}, but continuing: ${e.getMessage()}"
