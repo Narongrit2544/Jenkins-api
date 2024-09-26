@@ -14,14 +14,17 @@ pipeline {
                 script {
                     def containers = sh(script: "docker ps -a -q --filter 'name=jenkinstestjob-web-1'", returnStdout: true).trim()
                     if (containers) {
-                        // Stop and remove the existing container
-                        sh "docker stop ${containers} || true"
-                        sh "docker rm ${containers} || true"
-                        echo "Existing container removed."
+                        // Stop and remove the existing containers without sudo
+                        containers.split().each { containerId ->
+                            sh "docker stop ${containerId} || true"
+                            sh "docker rm ${containerId} || true"
+                        }
+                        echo "Existing containers removed."
                     } else {
                         echo "No existing containers to remove."
                     }
                 }
+                // Deploy using docker-compose
                 sh "docker compose up -d --build"
             }
         }
@@ -77,12 +80,15 @@ pipeline {
                     script {
                         def containers = sh(script: "docker ps -q", returnStdout: true).trim()
                         if (containers) {
-                            // Use try-catch to handle permission denied errors gracefully
-                            try {
-                                sh "docker stop ${containers}"
-                                echo "Containers stopped successfully."
-                            } catch (Exception e) {
-                                echo "Failed to stop containers, but continuing: ${e.getMessage()}"
+                            // Use try-catch to handle errors gracefully
+                            containers.split().each { containerId ->
+                                try {
+                                    sh "docker stop ${containerId}"
+                                    sh "docker rm ${containerId}"
+                                    echo "Container ${containerId} stopped and removed successfully."
+                                } catch (Exception e) {
+                                    echo "Failed to stop/remove container ${containerId}, but continuing: ${e.getMessage()}"
+                                }
                             }
                         } else {
                             echo "No running containers to stop."
