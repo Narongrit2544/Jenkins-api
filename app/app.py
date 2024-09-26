@@ -9,7 +9,7 @@ def index():
 
 @app.route('/getcode', methods=['GET']) #แก้ API ตรงนี้
 def getcode():
-    return "Hello, Test Jenkins Success!"
+    return "Hello, Test Jenkins Success Jaaa !"
 
 
 @app.route('/hello/<name>', methods=['GET'])
