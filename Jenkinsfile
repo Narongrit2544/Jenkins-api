@@ -5,7 +5,7 @@ pipeline {
     agent {label 'vmtest'}
     environment {
         GITLAB_IMAGE_NAME = "registry.gitlab.com/threeman/boomtestjenkins"
-        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/JenkinsTest@2"
+        VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/*******"
     }
     stages {
         stage('Deploy Docker Compose') {
