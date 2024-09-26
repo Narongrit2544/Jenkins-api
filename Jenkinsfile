@@ -2,20 +2,20 @@ pipeline {
     triggers {
         pollSCM('H/1 * * * *') // Check every 5 minutes
     }
-    agent {label 'vmtest'}
+    agent { label 'vmtest' }
     environment {
         GITLAB_IMAGE_NAME = "registry.gitlab.com/threeman/boomtestjenkins"
         VMTEST_MAIN_WORKSPACE = "/home/vmtest/workspace/jenkinstestJob"
     }
     stages {
         stage('Deploy Docker Compose') {
-            agent {label 'vmtest-test'}
+            agent { label 'vmtest-test' }
             steps {
-                sh "docker compose up -d --build"
+                sh "sudo docker compose up -d --build"
             }
         }
         stage("Run Tests") {
-            agent {label 'vmtest-test'}
+            agent { label 'vmtest-test' }
             steps {
                 sh '''
                 . /home/vmtest/env/bin/activate
@@ -25,13 +25,11 @@ pipeline {
                 coverage run -m unittest unit_test.py -v
                 coverage report -m
 
-                # Check if the directory already exists
                 rm -rf robot-aun
                 if [ ! -d "robot-aun" ]; then
                     git clone https://github.com/SDPxMTNRWTPKKS/robot-aun.git
                 fi
                 
-                # Install dependencies before running tests
                 pip install -r requirements.txt 
                 cd robot-aun
                 robot test-calculate.robot || true
@@ -39,7 +37,7 @@ pipeline {
             }
         }
         stage("Delivery to GitLab Registry") {
-            agent {label 'vmtest-test'}
+            agent { label 'vmtest-test' }
             steps {
                 withCredentials(
                     [usernamePassword(
@@ -47,7 +45,7 @@ pipeline {
                         passwordVariable: 'gitlabPassword',
                         usernameVariable: 'gitlabUser'
                     )]
-                ){
+                ) {
                     sh "sudo docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
                     sh "sudo docker tag ${GITLAB_IMAGE_NAME} ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                     sh "sudo docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
@@ -56,7 +54,7 @@ pipeline {
             }
         }
         stage("Pull from GitLab Registry") {
-            agent {label 'vmpreprod'}
+            agent { label 'vmpreprod' }
             steps {
                 withCredentials(
                     [usernamePassword(
@@ -66,9 +64,15 @@ pipeline {
                     )]
                 ) {
                     script {
-                        def containers = sh(script: "docker ps -q", returnStdout: true).trim()
+                        def containers = sh(script: "sudo docker ps -q", returnStdout: true).trim()
                         if (containers) {
-                            sh "sudo docker stop ${containers} || true "
+                            // Use try-catch to handle permission denied errors gracefully
+                            try {
+                                sh "sudo docker stop ${containers}"
+                                echo "Containers stopped successfully."
+                            } catch (Exception e) {
+                                echo "Failed to stop containers, but continuing: ${e.getMessage()}"
+                            }
                         } else {
                             echo "No running containers to stop."
                         }
