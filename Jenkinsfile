@@ -20,6 +20,11 @@ pipeline {
                 sh '''
                 . /home/vmtest/env/bin/activate
                 
+                cd ${VMTEST_MAIN_WORKSPACE}
+                python3 -m unittest unit_test.py -v
+                coverage run -m unittest unit_test.py -v
+                coverage report -m
+
                 # Check if the directory already exists
                 rm -rf robot-aun
                 if [ ! -d "robot-aun" ]; then
@@ -30,11 +35,6 @@ pipeline {
                 pip install -r requirements.txt 
                 cd robot-aun
                 robot test-calculate.robot || true
-                
-                cd ${VMTEST_MAIN_WORKSPACE}
-                python3 -m unittest unit_test.py -v
-                coverage run -m unittest unit_test.py -v
-                coverage report -m
                 '''
             }
         }
